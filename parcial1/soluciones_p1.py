@@ -15,3 +15,5 @@ def f2_intermedia(L):
             resultado += coef * (x ** i)
         return resultado
     return polinomio
+
+#faltan ejercicio 3 y 4
