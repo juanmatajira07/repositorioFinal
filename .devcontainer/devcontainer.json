@@ -8,10 +8,11 @@
         "python.formatting.provider": "black"
       },
       "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "ms-python.black-formatter"
-      ]
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.black-formatter",
+    "ms-toolsai.jupyter"
+]
     }
   },
   "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt",
