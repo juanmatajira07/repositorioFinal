@@ -16,4 +16,14 @@ def f2(L):
         return resultado
     return polinomio
 
-#faltan ejercicio 3 y 4
+#Ejercicio_3
+def f3(x0, y0):
+    def recta(x):
+        return 2 * (x - x0) + y0  
+    def paralela(x):
+        return 2 * (x - 1) + 1 
+    return recta, paralela
+#Ejercicio_4
+def f4(L):
+    L = [x for x in L if x > 10 and (int(str(x)[0]) + int(str(x)[-1])) % 2 == 0]
+    return sum(L)
