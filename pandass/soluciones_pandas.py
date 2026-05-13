@@ -14,4 +14,21 @@ def RankingFinal():
     df_rank = df_rank.sort_values(by='nota_final', ascending=False)
     df_rank.index = range(1, len(df_rank) + 1)
     return df_rank
-#faltan ejercicio 3 y 4
+
+import numpy as np
+#Ejercicio3
+def AprobadosPorParcial(umbral=3.0):
+    return (df >= umbral).sum()
+#Ejercicio4
+def TendenciaEstudiante(estudiante):
+    notas = df.loc[estudiante].values
+    x = np.arange(1, len(notas) + 1)
+    
+    m, b = np.polyfit(x, notas, 1)
+    
+    if m > 0:
+        return 'mejora'
+    elif m < 0:
+        return 'desmejora'
+    else:
+        return 'estable'
