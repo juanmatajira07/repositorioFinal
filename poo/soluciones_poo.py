@@ -51,85 +51,58 @@ class PolinomiosDerivables(Polinomio):
         b = y0 - (m * x0)
         return PolinomiosDerivables([b, m])
 #Ejercicio del cajero
-class Cajero:
-    def __init__(self, billetes_100k, billetes_50k, billetes_20k, billetes_10k, billetes_5k, saldo_ahorros, saldo_corriente, saldo_cod):
-        # 1. Inventario de billetes en el cajero
-        self.billetes = {
-            100000: billetes_100k,
-            50000: billetes_50k,
-            20000: billetes_20k,
-            10000: billetes_10k,
-            5000: billetes_5k
-        }
-        
-        # 2. Cuentas y saldos del cliente
-        self.cuentas = {
-            "ahorros": saldo_ahorros,
-            "corriente": saldo_corriente,
-            "COD": saldo_cod
-        }
+class Cajero():
+    def __init__(self, n1, n2, n5):
+        # n1: billetes de 10000, n2: billetes de 20000, n5: billetes de 50000
+        self.billetes_10k = n1
+        self.billetes_20k = n2
+        self.billetes_50k = n5
 
-    def retirar(self, tipo_cuenta, cantidad):
-        # Validar que la cuenta exista
-        if tipo_cuenta not in self.cuentas:
-            return "Error: Tipo de cuenta no válido. Use 'ahorros', 'corriente' o 'COD'."
+    def retiro(self, x):
+        # 1. Validar que sea múltiplo de 10000
+        if x % 10000 != 0:
+            return "Error: La cantidad solicitada debe ser múltiplo de 10000."
 
-        # Validar el múltiplo mínimo (ahora el billete más pequeño es de 5000)
-        if cantidad % 5000 != 0:
-            return "Error: Solo se pueden retirar múltiplos de $5000."
+        # Variables temporales para hacer el cálculo sin afectar el inventario real aún
+        cantidad_restante = x
+        entregar_50k = 0
+        entregar_20k = 0
+        entregar_10k = 0
 
-        # Validar que la cuenta tenga saldo suficiente
-        if cantidad > self.cuentas[tipo_cuenta]:
-            return f"Error: Saldo insuficiente en su cuenta '{tipo_cuenta}'. Saldo actual: ${self.cuentas[tipo_cuenta]}"
+        # 2. Lógica para calcular billetes (de mayor a menor denominación)
+        # Billetes de 50,000
+        necesarios_50k = cantidad_restante // 50000
+        entregar_50k = min(necesarios_50k, self.billetes_50k)
+        cantidad_restante -= entregar_50k * 50000
 
-        # Lógica para calcular billetes a entregar
-        cantidad_restante = cantidad
-        billetes_a_entregar = {}
-        
-        # Hacemos una copia temporal del inventario del cajero por si no logramos completar la suma
-        inventario_temp = self.billetes.copy()
+        # Billetes de 20,000
+        necesarios_20k = cantidad_restante // 20000
+        entregar_20k = min(necesarios_20k, self.billetes_20k)
+        cantidad_restante -= entregar_20k * 20000
 
-        # Recorremos las denominaciones de mayor a menor (100k -> 5k)
-        for denominacion in sorted(self.billetes.keys(), reverse=True):
-            if cantidad_restante == 0:
-                break # Ya completamos el monto
-            
-            # Cuántos billetes de esta denominación idealmente necesitamos
-            necesarios = cantidad_restante // denominacion
-            
-            # Cuántos podemos dar realmente (el mínimo entre lo que necesitamos y lo que hay en el cajero)
-            a_dar = min(necesarios, inventario_temp[denominacion])
+        # Billetes de 10,000
+        necesarios_10k = cantidad_restante // 10000
+        entregar_10k = min(necesarios_10k, self.billetes_10k)
+        cantidad_restante -= entregar_10k * 10000
 
-            if a_dar > 0:
-                billetes_a_entregar[denominacion] = a_dar
-                cantidad_restante -= (a_dar * denominacion)
-                inventario_temp[denominacion] -= a_dar # Restamos del inventario temporal
+        # 3. Verificación final y actualización
+        if cantidad_restante == 0:
+            # Si logramos cubrir el monto exacto, actualizamos los atributos reales
+            self.billetes_50k -= entregar_50k
+            self.billetes_20k -= entregar_20k
+            self.billetes_10k -= entregar_10k
+            return f"Retiro exitoso. Entregando: {entregar_50k}x50k, {entregar_20k}x20k, {entregar_10k}x10k."
+        else:
+            # Si sobra cantidad, el cajero no tiene cómo dar el cambio exacto
+            return "Error: El cajero no dispone de la cantidad o denominación de billetes necesaria."
 
-        # Si después de revisar todos los billetes la cantidad restante no es 0, el cajero no tiene el cambio exacto
-        if cantidad_restante > 0:
-            return "Error: El cajero no dispone de la denominación de billetes necesaria para este retiro."
+    def consignacion(self, n1, n2, n5):
+        # Se suman los billetes ingresados al inventario actual
+        self.billetes_10k += n1
+        self.billetes_20k += n2
+        self.billetes_50k += n5
+        return "Consignación exitosa. Inventario actualizado."
 
-        # === TRANSACCIÓN EXITOSA ===
-        # 1. Actualizamos el inventario real del cajero
-        self.billetes = inventario_temp
-        
-        # 2. Descontamos el dinero del saldo de la cuenta
-        self.cuentas[tipo_cuenta] -= cantidad
-
-        # Imprimir el recibo
-        print(f"\n--- RETIRO EXITOSO ---")
-        print(f"Cuenta: {tipo_cuenta.capitalize()}")
-        print(f"Monto retirado: ${cantidad}")
-        print("Billetes entregados:")
-        for denom, cant in billetes_a_entregar.items():
-            print(f" - {cant} billete(s) de ${denom}")
-        print(f"Nuevo saldo en cuenta: ${self.cuentas[tipo_cuenta]}")
-        print("----------------------\n")
-        
-        return "Transacción completada."
-
-    def mostrar_estado_cajero(self):
-        print("\n--- INVENTARIO DEL CAJERO ---")
-        for denom, cant in self.billetes.items():
-            print(f"${denom}: {cant} billetes")
-        print("-----------------------------\n")
+    def verificar_estado(self):
+        # Retorna el mensaje con el conteo actual de cada denominación
+        return f"Billetes en cajero -> 10000: {self.billetes_10k} | 20000: {self.billetes_20k} | 50000: {self.billetes_50k}"
